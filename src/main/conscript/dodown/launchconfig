@@ -1,0 +1,12 @@
+[app]
+  name: dodown
+  version: 0.1.0
+  org: com.github.philcali
+  class: dodown.DoDown
+[scala]
+  version: 2.9.0
+[repositories]
+  local
+  maven-local
+  scala-tools-releases
+  maven-central
