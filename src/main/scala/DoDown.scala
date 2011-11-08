@@ -16,7 +16,7 @@ object DoD {
 }
 
 case class DoD(prefix: String) {
-  val Contest = """href="%s-(.+)/">""".format(prefix).r
+  val Contest = """href="%s(.+)/">""".format(prefix).r
     
   val MP3 = """href="(.+)\.mp3">""".r
 
@@ -28,12 +28,12 @@ case class DoD(prefix: String) {
     Contest.findFirstIn(http(DoD.base as_str)).map { c =>
       val Contest(name) = c
       
-      val locationName = "%s-%s" format (prefix, name)
+      val locationName = "%s%s" format (prefix, name)
 
       println("The Contest is: %s" format(name))
       http(DoD.base / locationName as_str).split("\n").foreach { html =>
         MP3.findFirstIn(html).map { li =>
-          val MP3(song) = li
+          val MP3(song) = li.replaceAll("%20", " ")
 
           println(song)
         }
@@ -47,14 +47,14 @@ case class DoD(prefix: String) {
     Contest.findFirstIn(http(DoD.base as_str)).map { c =>
       val Contest(name) = c
 
-      val locationName = "%s-%s" format (prefix, name)
+      val locationName = "%s%s" format (prefix, name)
 
       val location = new File(base, locationName)
       if (!location.exists) location.mkdir
 
       http(DoD.base / locationName as_str).split("\n").foreach { html =>
         MP3.findFirstIn(html).map { li =>
-          val MP3(song) = li
+          val MP3(song) = li.replaceAll("&amp;", "&");
           val Rank(n) = song.replace("ZZ", "99")
 
           if (threshold.isEmpty || threshold.map(_ >= n.toInt).getOrElse(false)) {
@@ -89,6 +89,15 @@ case class DoD(prefix: String) {
         f.commit()
       }
     }
+  }
+}
+
+class DoDown extends xsbti.AppMain {
+  case class Exit(code: Int) extends xsbti.Exit
+
+  def run(config: xsbti.AppConfiguration) = {
+    DoDown.main(config.arguments)
+    Exit(0)
   }
 }
 
